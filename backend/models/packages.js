@@ -1,8 +1,8 @@
 const {Schema, model} = require('mongoose');
 
 const packageSchema = Schema ({
-    id: String,
-    data: Object,
+    // id: String,
+    // data: Object,
     tracking_number: {type: String, required: true},
     carrier_code: String
     // status: String,
