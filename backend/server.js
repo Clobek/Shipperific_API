@@ -4,6 +4,8 @@ require('custom-env').env(true);
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const unirest = require('unirest');
+mongoose.Promise = global.Promise;
 // const cors = require('cors')
 
 // GLOBALS 
@@ -24,6 +26,11 @@ db.on('open', () => {
 db.on('error', (err) => {
     console.log(err);
 })
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.log('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Application specific logging, throwing an error, or other logic here
+  });
 
 // MIDDLEWARE
 // app.use(cors())
