@@ -30,7 +30,7 @@ db.on('error', (err) => {
 })
 
 //MIDDLEWARE
-
+app.use(cors());
 app.use(express.json())
 
 // MAP
