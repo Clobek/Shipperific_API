@@ -1,6 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const Package = require('../models/packages.js');
+const express =         require("express");
+const routes =          express.routes();
+const { Schema } =      require("mongoose");
+const Product =         require("../models/packages.js");
+const show =            console.log;
 // const unirest = require('unirest');
 
 // ROUTES
@@ -22,7 +24,7 @@ const Package = require('../models/packages.js');
 // req.end(function (res) {
 // 	if (res.error) throw new Error(res.error);
 
-// router.post('/', async (req, res) => {
+// routes.post('/', async (req, res) => {
 //     try {
 //         const createdPackage = await fetch('https://order-tracking.p.rapidapi.com/trackings/realtime', {
 //             method: 'POST',
@@ -35,38 +37,37 @@ const Package = require('../models/packages.js');
 //             body: JSON.stringify(data),
 //         });
 //     } catch(error) {
-//         res.status(400).json(error);   
+//         res.status(400).json(error);
 //     }
 // })
 
-router.post('/', async (req, res) => {
-    try {
-        console.log(req.body)
-        const createdPackage = await Package.create(req.body);
-        res.status(200).json(createdPackage);
-    } catch(error) {
-        res.status(400).json(error);
-    }
-})
+routes.post("/", async (req, res) => {
+  try {
+    console.log(req.body);
+    const createdProduct = await Product.create(req.body);
+    res.status(200).json(createdProduct);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+});
 
-
-// router.post('/', async (req, res) => {
+// routes.post('/', async (req, res) => {
 //     try {
 //         console.log(req.body)
-//         const createdPackage = await Package.create(req.body);
-//         res.status(200).json(createdPackage);
+//         const createdProduct = await Product.create(req.body);
+//         res.status(200).json(createdProduct);
 //     } catch(error) {
 //         res.status(400).json(error);
 //     }
 // })
 
-router.get('/', async (req, res) => {
-    try {
-        const packages = await Package.find({});
-        res.status(200).json(packages);
-    } catch(error) {
-        res.status(400).json(error)
-    }
-})
+routes.get("/", async (req, res) => {
+  try {
+    const Products = await Product.find({});
+    res.status(200).json(Products);
+  } catch (error) {
+    res.status(400).json(error);
+  }
+});
 
-module.exports = router;
+module.exports = routes;

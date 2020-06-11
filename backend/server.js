@@ -1,33 +1,27 @@
 // DEPENDENCIES
 
-require('custom-env').env(true);
-const express = require('express');
+require("custom-env").env(true);
+const express = require("express");
 const app = express();
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 // const unirest = require('unirest');
 // mongoose.Promise = global.Promise;
 // const cors = require('cors')
 
-// GLOBALS 
+// GLOBALS
 
 const PORT = process.env.PORT || 3000;
-const packageController = require('./controllers/packages');
+const packageController = require("./controllers/packages");
 const db = mongoose.connection;
-const MONGODB_URI = process.env.MONGODB_URL || 'mongodb://localhost:27017/packages'
+const MONGODB_URI =
+  process.env.MONGODB_URL || "mongodb://localhost:27017/packages";
 
-
-// CONNECT TO DATABASE
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true, 
-    useUnifiedTopology: true,
-    useFindAndModify: true
-});
-db.on('open', () => {
-    console.log('connected to mongo')
-})
-db.on('error', (err) => {
-    console.log(err);
-})
+/****
+ * Mongoose
+ **/
+const mongoose =        require("mongoose");
+const mongoURI =        "mongodb://localhost: 27017/products";
+const db =              mongoose.connection;
 
 // process.on('unhandledRejection', (reason, promise) => {
 //     console.log('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -36,9 +30,13 @@ db.on('error', (err) => {
 
 // MIDDLEWARE
 // app.use(cors())
-app.use(express.json())
-app.use('/packages', packageController)
-
+app.use(express.static("public"));
+app.use(methodOverride("_method"));
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+app.set("view engine", "jsx");
+app.engine("jsx", require("express-react-views").createEngine());
+app.use("/packages", packageController);
 
 // var req = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
 
@@ -62,7 +60,17 @@ app.use('/packages', packageController)
 // 	console.log(res.body);
 // });
 
+/****
+ * Connect
+ **/
+mongoose.connect(mongoURI, {
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useFindAndModify: true,
+  });
+  db.once("open", () => show("db open on", mongoURI));
+
 // SERVER LISTENER
-app.listen(PORT, ()=> {
-    console.log(`Listening on port ${PORT}`)
-})
+app.listen(PORT, () => {
+  console.log(`Listening on port ${PORT}`);
+});
