@@ -4,7 +4,7 @@ const packageSchema = Schema ({
     // id: String,
     // data: Object,
     tracking_number: {type: String, required: true},
-    carrier_code: String
+    carrier_code: String,
     // status: String,
     // origin_info: Object, // includes ItemReceived and DestinationArrived timestamps
     // trackinfo: Array,
@@ -19,4 +19,6 @@ const packageSchema = Schema ({
     // lastUpdateTime: String
 })
 
-const Package = model('Package', packageSchema)
+const Package = model('Package', packageSchema);
+
+module.exports = Package;
