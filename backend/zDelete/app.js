@@ -29,3 +29,8 @@ const test = async () => {
     const result = await response.json()
     console.log(result)
 }
+
+const logout = () => {
+    token = '';
+    window.localStorage.removeItem('token')
+}
