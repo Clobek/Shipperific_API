@@ -86,41 +86,19 @@ app.get('/test', auth, (req, res) => {
   res.send(req.user)
 })
 
-
-
-
-
-
-//     try {
-  //         const token = authorization.split(' ')[1]; // takes token from header
-  //         const result = jwt.verify(token, SECRET)
-  //         req.user = result;
-  //         console.log(req.user)
-  //         // const payload = jwt.verify(token, SECRET);
-  //         // req.user = payload; // adds user data into request
-  //         next(); // goes to next route
-  //     } catch(error) {
-  //         res.status(400).json(error)
-  //     }
-  // } else {
-  //     res.status(400).send('No Authorization header')
-  // }
-// }
-
-const approvedList = ['http://localhost:1985'];
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (approvedList.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-};
-
-
+// const approvedList = ['http://localhost:1985'];
+// const corsOptions = {
+//     origin: function (origin, callback) {
+//         if (approvedList.indexOf(origin) !== -1) {
+//             callback(null, true);
+//         } else {
+//             callback(new Error('Not allowed by CORS'));
+//         }
+//     },
+// };
 
 // MAP
+
 // GOOGLE MAPS - Maps JavaScript API. Source: https://developers.google.com/maps/documentation/javascript/geocoding
 var map;
 function initMap() {
@@ -215,116 +193,6 @@ function initMap() {
   var marker = new google.maps.Marker({map: map, position: { lat: -34.397, lng: 150.644 }});
 }
 
-
-// var geocoder;
-//   var map;
-//   function initialize() {
-//     geocoder = new google.maps.Geocoder();
-//     var mapOptions = {
-//       zoom: 12,
-//       styles: [
-//         {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
-//         {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
-//         {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
-//         {
-//           featureType: 'administrative.locality',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#d59563'}]
-//         },
-//         {
-//           featureType: 'poi',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#d59563'}]
-//         },
-//         {
-//           featureType: 'poi.park',
-//           elementType: 'geometry',
-//           stylers: [{color: '#263c3f'}]
-//         },
-//         {
-//           featureType: 'poi.park',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#6b9a76'}]
-//         },
-//         {
-//           featureType: 'road',
-//           elementType: 'geometry',
-//           stylers: [{color: '#38414e'}]
-//         },
-//         {
-//           featureType: 'road',
-//           elementType: 'geometry.stroke',
-//           stylers: [{color: '#212a37'}]
-//         },
-//         {
-//           featureType: 'road',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#9ca5b3'}]
-//         },
-//         {
-//           featureType: 'road.highway',
-//           elementType: 'geometry',
-//           stylers: [{color: '#746855'}]
-//         },
-//         {
-//           featureType: 'road.highway',
-//           elementType: 'geometry.stroke',
-//           stylers: [{color: '#1f2835'}]
-//         },
-//         {
-//           featureType: 'road.highway',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#f3d19c'}]
-//         },
-//         {
-//           featureType: 'transit',
-//           elementType: 'geometry',
-//           stylers: [{color: '#2f3948'}]
-//         },
-//         {
-//           featureType: 'transit.station',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#d59563'}]
-//         },
-//         {
-//           featureType: 'water',
-//           elementType: 'geometry',
-//           stylers: [{color: '#17263c'}]
-//         },
-//         {
-//           featureType: 'water',
-//           elementType: 'labels.text.fill',
-//           stylers: [{color: '#515c6d'}]
-//         },
-//         {
-//           featureType: 'water',
-//           elementType: 'labels.text.stroke',
-//           stylers: [{color: '#17263c'}]
-//         }
-//       ]
-//     }
-//     map = new google.maps.Map(document.getElementById('map'), mapOptions);
-//   }
-
-//   function codeAddress() {
-//     var address = document.getElementById('address').value;
-//     geocoder.geocode( { 'address': address}, function(results, status) {
-//       if (status == 'OK') {
-//         map.setCenter(results[0].geometry.location);
-//         var marker = new google.maps.Marker({
-//             map: map,
-//             position: results[0].geometry.location
-//         });
-//       } else {
-//         alert('Geocode was not successful for the following reason: ' + status);
-//       }
-//     });
-//   }
-
-//   initialize();
-
-
-
 // ROUTES
 
 app.get('/api/:id/:carrier_code', (req, res) => {
@@ -366,8 +234,6 @@ app.get('/api/:id/:carrier_code', (req, res) => {
 
 // Geocoding API
 // https://maps.googleapis.com/maps/api/geocode/json?address=Wilmington,+DE&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
-
-
 
 // app.get('/index', async (req, res) => {
 //     res.json(await Package.find({}))
