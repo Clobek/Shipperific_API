@@ -3,6 +3,7 @@
 require("custom-env").env(true);
 const express = require("express");
 const app = express();
+const methodOverride =  require("method-override");
 const mongoose = require("mongoose");
 // const unirest = require('unirest');
 // mongoose.Promise = global.Promise;
@@ -19,9 +20,9 @@ const MONGODB_URI =
 /****
  * Mongoose
  **/
-const mongoose =        require("mongoose");
-const mongoURI =        "mongodb://localhost: 27017/products";
-const db =              mongoose.connection;
+const mongoose = require("mongoose");
+const mongoURI = "mongodb://localhost: 27017/products";
+const db = mongoose.connection;
 
 // process.on('unhandledRejection', (reason, promise) => {
 //     console.log('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -64,11 +65,11 @@ app.use("/packages", packageController);
  * Connect
  **/
 mongoose.connect(mongoURI, {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useFindAndModify: true,
-  });
-  db.once("open", () => show("db open on", mongoURI));
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+  useFindAndModify: true,
+});
+db.once("open", () => show("db open on", mongoURI));
 
 // SERVER LISTENER
 app.listen(PORT, () => {

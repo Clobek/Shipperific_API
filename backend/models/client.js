@@ -1,8 +1,14 @@
-const { Schema, model } = require("mongoose");
+const mongoose = require("mongoose");
+const { Schema, model } = mongoose;
 
-const clientSchema = new Schema({
-  client: String,
-  shopping_cart: Array,
-});
+const userSchema = new Schema(
+  {
+    username: { type: String, unique: true, required: true },
+    password: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
-module.exports = model("Client", clientSchema);
+const Client = model("Client", userSchema);
+
+module.exports = Client;
