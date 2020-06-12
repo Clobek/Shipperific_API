@@ -1,8 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { Schema } = require('mongoose');
+// const { Schema } = require('mongoose');
 const Package = require('../models/packages.js');
 const unirest = require('unirest');
+const jwt = require('jsonwebtoken');
+
+// AUTH MIDDLEWARE
+const auth = async (req, res, next) => {
+    const {authorization} = req.headers;
+    // check if there's a header
+    if (authorization) {
+        try {
+            const token = authorization.split(' ')[1]; // takes token from header
+            const payload = jwt.verify(token, 'secret');
+            req.user = payload; // adds user data into request
+            next(); // goes to next route
+        } catch(error) {
+            res.status(400).json(error)
+        }
+    } else {
+        res.status(400).send('No Authorization header')
+    }
+}
+
+// ROUTES
 
 router.get('/api/:id/:carrier_code', (req, res) => {
     const apiReq = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
@@ -43,36 +64,61 @@ router.get('/api/:id/:carrier_code', (req, res) => {
 // Geocoding API
 // https://maps.googleapis.com/maps/api/geocode/json?address=Wilmington,+DE&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
 
-router.get('/index', async (req, res) => {
-    res.json(await Package.find({}))
-})
 
-router.post('/create', async (req, res) => {
-    res.json(await Package.create(req.body)) 
-})
+// INDEX
+router.get('/', async (req, res) => {
+    try {
+        const packages = await Package.find({});
+        res.status(200).json(packages);
+    } catch(error) {
+        res.status(400).json(error)
+    }
+});
 
-router.get('/show/:id', async (req, res) => {
-    res.json(await Package.findById(req.params.id))
-})
-
-router.put('/update/:id', async (req, res) => {
-    res.json(await Package.findByIdAndUpdate(req.params.id, req.body))
-})
-
-router.delete('/delete/:id', async (req, res) => {
-    res.json(await Package.findByIdAndDelete(req.params.id))
-})
-
-// LOGIN 
-router.post('/login', async (req, res) => {
-    const {username, password} = req.body;
-    if(username === user.username && password === user.password) {
-        const token = jwt.sign({username}, 'secret');
-        res.status(200).json(token);
-    } else {
-        res.status(400).send('Wrong Username or Password')
+// CREATE
+router.post('/', async (req, res) => {
+    try {
+        console.log(req.body);
+        const createdPackage = await Package.create(req.body);
+        res.status(200).json(createdPackage);
+    } catch(error) {
+        res.status(400).json(error);
     }
 })
+
+// SHOW
+router.get('/:id', async (req, res) => {
+    try {
+        const foundPackage = await Package.findById(req.params.id);
+        res.status(200).json(foundPackage)
+    } catch(error) {
+        res.status(400).json(error);        
+    }
+})
+
+// UPDATE
+router.put('/:id', async (req, res) => {
+    try {
+        const updatedPackage = await Package.findByIdAndUpdate(
+            req.params.id, 
+            req.body
+            );
+            res.status(200).json(updatedPackage)
+    } catch(error) {
+        res.status(400).json(error);
+    }
+})
+
+// DELETE
+router.delete('/:id', async (req, res) => {
+    try {
+        const deletedPackage = await Package.findByIdAndDelete(req.params.id)
+        res.status(200).json(deletedPackage)
+    } catch(error) {
+        res.status(400).json(error);
+    }
+});
+
 
 // packages.post('/', async (req, res) => {
 //     try {
