@@ -5,7 +5,8 @@ const packageSchema = Schema ({
     // data: Object,
     tracking_number: {type: String, required: true},
     carrier_code: String,
-    // status: String,
+    userID: String
+    // status: String
     // origin_info: Object, // includes ItemReceived and DestinationArrived timestamps
     // trackinfo: Array,
     // Date: String, 
