@@ -67,12 +67,24 @@ const auth = async (req, res, next) => {
           const token = authorization.split(' ')[1]; // takes token from header
           const result = jwt.verify(token, SECRET)
           req.user = result;
-          console.log(req.user)
+          // console.log(req.user)
+          next();
   } else {
           res.send('NO TOKEN')
   }
 }
-  //     try {
+
+// TEST ROUTE
+app.get('/test', auth, (req, res) => {
+  res.send('Authentication works')
+})
+
+
+
+
+
+
+//     try {
   //         const token = authorization.split(' ')[1]; // takes token from header
   //         const result = jwt.verify(token, SECRET)
   //         req.user = result;
