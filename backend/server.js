@@ -37,6 +37,8 @@ app.use(cors());
 app.use(express.json())
 app.use('/packages/', packageController);
 
+// From Alex Merced's AM Coder - JWT Authentication/ExpressJS - Backend & Frontend. Source: https://www.youtube.com/watch?v=qVe9RpLLEWg
+
 // DUMMY USER
 const user = {username: 'bryce', password: 'ship'}
 
