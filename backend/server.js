@@ -9,6 +9,7 @@ const unirest = require("unirest");
 const KEY = process.env.KEY
 const jwt = require('jsonwebtoken')
 const packageController = require('./controllers/packages.js');
+const SECRET = process.env.SECRET
 // const initMap = require('./maps.js')
 // const Index = require('./index')
 
@@ -37,20 +38,67 @@ app.use(express.json())
 app.use('/packages/', packageController);
 
 // DUMMY USER
-// const user = {username: 'Bryce', password: 'ship'}
+const user = {username: 'bryce', password: 'ship'}
 
-// const whitelist = ['http://localhost:1985'];
-// const corsOptions = {
-//     origin: function (origin, callback) {
-//         if (whitelist.indexOf(origin) !== -1) {
-//             callback(null, true);
-//         } else {
-//             callback(new Error('Not allowed by CORS'));
-//         }
-//     },
-// };
+// AUTHENTICATE ROUTE
 
-// LOGIN
+// const token = jwt.sign({cheese: 'gouda'}, SECRET);
+// console.log(token)
+// const decoded = jwt.verify(token, SECRET);
+// console.log(decoded)
+
+// LOGIN 
+app.post('/login', async (req, res) => {
+  const {username, password} = req.body;
+  if(username === user.username && password === user.password) {
+      const token = jwt.sign({username}, SECRET);
+      res.status(200).json(token);
+  } else {
+      res.status(400).send('Wrong Username or Password')
+  }
+})
+
+// AUTHORIZATION MIDDLEWARE
+const auth = async (req, res, next) => {
+  const {authorization} = req.headers;
+  // "bearer a452348956y0"
+  // check if there's a header
+  if (authorization) {
+          const token = authorization.split(' ')[1]; // takes token from header
+          const result = jwt.verify(token, SECRET)
+          req.user = result;
+          console.log(req.user)
+  } else {
+          res.send('NO TOKEN')
+  }
+}
+  //     try {
+  //         const token = authorization.split(' ')[1]; // takes token from header
+  //         const result = jwt.verify(token, SECRET)
+  //         req.user = result;
+  //         console.log(req.user)
+  //         // const payload = jwt.verify(token, SECRET);
+  //         // req.user = payload; // adds user data into request
+  //         next(); // goes to next route
+  //     } catch(error) {
+  //         res.status(400).json(error)
+  //     }
+  // } else {
+  //     res.status(400).send('No Authorization header')
+  // }
+// }
+
+const approvedList = ['http://localhost:1985'];
+const corsOptions = {
+    origin: function (origin, callback) {
+        if (approvedList.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+};
+
 
 
 // MAP
@@ -300,16 +348,7 @@ app.get('/api/:id/:carrier_code', (req, res) => {
 // Geocoding API
 // https://maps.googleapis.com/maps/api/geocode/json?address=Wilmington,+DE&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
 
-// LOGIN 
-app.post('/login', async (req, res) => {
-  const {username, password} = req.body;
-  if(username === user.username && password === user.password) {
-      const token = jwt.sign({username}, 'secret');
-      res.status(200).json(token);
-  } else {
-      res.status(400).send('Wrong Username or Password')
-  }
-})
+
 
 // app.get('/index', async (req, res) => {
 //     res.json(await Package.find({}))

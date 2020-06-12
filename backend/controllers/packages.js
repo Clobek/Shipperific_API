@@ -5,24 +5,6 @@ const Package = require('../models/packages.js');
 const unirest = require('unirest');
 const jwt = require('jsonwebtoken');
 
-// AUTH MIDDLEWARE
-const auth = async (req, res, next) => {
-    const {authorization} = req.headers;
-    // check if there's a header
-    if (authorization) {
-        try {
-            const token = authorization.split(' ')[1]; // takes token from header
-            const payload = jwt.verify(token, 'secret');
-            req.user = payload; // adds user data into request
-            next(); // goes to next route
-        } catch(error) {
-            res.status(400).json(error)
-        }
-    } else {
-        res.status(400).send('No Authorization header')
-    }
-}
-
 // ROUTES
 
 router.get('/api/:id/:carrier_code', (req, res) => {
@@ -68,6 +50,9 @@ router.get('/api/:id/:carrier_code', (req, res) => {
 // INDEX
 router.get('/', async (req, res) => {
     try {
+        // const packages = await Package.find({
+        //     userID: userdata.id
+        // });
         const packages = await Package.find({});
         res.status(200).json(packages);
     } catch(error) {
@@ -80,6 +65,7 @@ router.post('/', async (req, res) => {
     try {
         console.log(req.body);
         const createdPackage = await Package.create(req.body);
+        // const createdPackage = await Package.create({userID: req.body.token});
         res.status(200).json(createdPackage);
     } catch(error) {
         res.status(400).json(error);
