@@ -51,8 +51,8 @@ const user = {username: 'bryce', password: 'ship'}
 app.post('/login', async (req, res) => {
   const {username, password} = req.body;
   if(username === user.username && password === user.password) {
-      const token = jwt.sign({username}, SECRET);
-      res.status(200).json(token);
+      const token = await jwt.sign({username}, SECRET);
+      await res.status(200).json(token);
   } else {
       res.status(400).send('Wrong Username or Password')
   }
@@ -65,6 +65,7 @@ const auth = async (req, res, next) => {
   // "bearer a452348956y0"
   // check if there's a header
   if (authorization) {
+    // console.log(authorization)
           const token = authorization.split(' ')[1]; // takes token from header
           const result = jwt.verify(token, SECRET)
           req.user = result;
@@ -80,7 +81,7 @@ const auth = async (req, res, next) => {
 
 // TEST ROUTE
 app.get('/test', auth, (req, res) => {
-  res.send('Authentication works')
+  res.send(req.user)
 })
 
 
