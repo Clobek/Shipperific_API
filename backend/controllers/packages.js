@@ -1,10 +1,10 @@
 const express = require('express');
-const packages = express.Router();
+const router = express.Router();
 const { Schema } = require('mongoose');
 const Package = require('../models/packages.js');
 const unirest = require('unirest');
 
-packages.get('/api/:id/:carrier_code', (req, res) => {
+router.get('/api/:id/:carrier_code', (req, res) => {
     const apiReq = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
         apiReq.headers({
         "x-rapidapi-host": "order-tracking.p.rapidapi.com",
@@ -43,28 +43,28 @@ packages.get('/api/:id/:carrier_code', (req, res) => {
 // Geocoding API
 // https://maps.googleapis.com/maps/api/geocode/json?address=Wilmington,+DE&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
 
-packages.get('/index', async (req, res) => {
+router.get('/index', async (req, res) => {
     res.json(await Package.find({}))
 })
 
-packages.post('/create', async (req, res) => {
+router.post('/create', async (req, res) => {
     res.json(await Package.create(req.body)) 
 })
 
-packages.get('/show/:id', async (req, res) => {
+router.get('/show/:id', async (req, res) => {
     res.json(await Package.findById(req.params.id))
 })
 
-packages.put('/update/:id', async (req, res) => {
+router.put('/update/:id', async (req, res) => {
     res.json(await Package.findByIdAndUpdate(req.params.id, req.body))
 })
 
-packages.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', async (req, res) => {
     res.json(await Package.findByIdAndDelete(req.params.id))
 })
 
 // LOGIN 
-packages.post('/login', async (req, res) => {
+router.post('/login', async (req, res) => {
     const {username, password} = req.body;
     if(username === user.username && password === user.password) {
         const token = jwt.sign({username}, 'secret');
@@ -94,4 +94,4 @@ packages.post('/login', async (req, res) => {
 // //   });
   
 
-  module.exports = packages;
+  module.exports = router;

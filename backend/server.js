@@ -8,6 +8,7 @@ const Package = require('./models/packages.js')
 const unirest = require("unirest");
 const KEY = process.env.KEY
 const jwt = require('jsonwebtoken')
+const packageController = require('./controllers/packages.js');
 // const initMap = require('./maps.js')
 // const Index = require('./index')
 
@@ -33,22 +34,21 @@ db.on('error', (err) => {
 //MIDDLEWARE
 app.use(cors());
 app.use(express.json())
-const packageController = require('./controllers/packages.js');
 app.use('/pacakges', packageController);
 
 // DUMMY USER
-const user = {username: 'Bryce', password: 'ship'}
+// const user = {username: 'Bryce', password: 'ship'}
 
-const whitelist = ['http://localhost:1985'];
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (whitelist.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-};
+// const whitelist = ['http://localhost:1985'];
+// const corsOptions = {
+//     origin: function (origin, callback) {
+//         if (whitelist.indexOf(origin) !== -1) {
+//             callback(null, true);
+//         } else {
+//             callback(new Error('Not allowed by CORS'));
+//         }
+//     },
+// };
 
 
 // MAP
