@@ -1,77 +1,227 @@
-// DEPENDENCIES
-
-require("custom-env").env(true);
-const express = require("express");
+require('custom-env').env(true);
+const express = require('express')
 const app = express();
-const methodOverride =  require("method-override");
-const mongoose = require("mongoose");
-// const unirest = require('unirest');
-// mongoose.Promise = global.Promise;
-// const cors = require('cors')
+const mongoose = require('mongoose');
+const cors = require('cors')
+const PORT = process.env.PORT
+const Package = require('./models/packages.js')
+const unirest = require("unirest");
+const KEY = process.env.KEY
+// const initMap = require('./maps.js')
+// const Index = require('./index')
 
-// GLOBALS
 
-const PORT = process.env.PORT || 3000;
-const packageController = require("./controllers/packages");
+// MONGO DATABASE
 const db = mongoose.connection;
-const MONGODB_URI =
-  process.env.MONGODB_URL || "mongodb://localhost:27017/packages";
+const dbConfig = {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useFindAndModify: true
+}
 
-/****
- * Mongoose
- **/
-const mongoose = require("mongoose");
-const mongoURI = "mongodb://localhost: 27017/products";
-const db = mongoose.connection;
+mongoose.connect(process.env.MONGODB_URI, dbConfig)
 
-// process.on('unhandledRejection', (reason, promise) => {
-//     console.log('Unhandled Rejection at:', promise, 'reason:', reason);
-//     // Application specific logging, throwing an error, or other logic here
-//   });
+db.on('open', () => {
+    console.log('connected to mongo')
+})
 
-// MIDDLEWARE
-// app.use(cors())
-app.use(express.static("public"));
-app.use(methodOverride("_method"));
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.set("view engine", "jsx");
-app.engine("jsx", require("express-react-views").createEngine());
-app.use("/packages", packageController);
+db.on('error', (err) => {
+    console.log(err)
+})
 
-// var req = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
+//MIDDLEWARE
+app.use(cors());
+app.use(express.json())
 
-// req.headers({
-// 	"x-rapidapi-host": "order-tracking.p.rapidapi.com",
-// 	"x-rapidapi-key": "71db88e15amshcf09b459b324355p146d98jsn535e15d76413",
-// 	"content-type": "application/json",
-// 	"accept": "application/json",
-// 	"useQueryString": true
-// });
+// MAP
 
-// req.type("json");
-// req.send({
-// 	"tracking_number": "1Z74A08E0317341984",
-// 	"carrier_code": "ups"
-// });
+var map;
+function initMap() {
+    let latitude;
+    let longitude;
+    map = new google.maps.Map(document.getElementById("map"), {
+      center: {lat: latitude, lng: longitude},
+            zoom: 12,
+            styles: [
+              {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
+              {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
+              {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
+              {
+                featureType: 'administrative.locality',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#d59563'}]
+              },
+              {
+                featureType: 'poi',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#d59563'}]
+              },
+              {
+                featureType: 'poi.park',
+                elementType: 'geometry',
+                stylers: [{color: '#263c3f'}]
+              },
+              {
+                featureType: 'poi.park',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#6b9a76'}]
+              },
+              {
+                featureType: 'road',
+                elementType: 'geometry',
+                stylers: [{color: '#38414e'}]
+              },
+              {
+                featureType: 'road',
+                elementType: 'geometry.stroke',
+                stylers: [{color: '#212a37'}]
+              },
+              {
+                featureType: 'road',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#9ca5b3'}]
+              },
+              {
+                featureType: 'road.highway',
+                elementType: 'geometry',
+                stylers: [{color: '#746855'}]
+              },
+              {
+                featureType: 'road.highway',
+                elementType: 'geometry.stroke',
+                stylers: [{color: '#1f2835'}]
+              },
+              {
+                featureType: 'road.highway',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#f3d19c'}]
+              },
+              {
+                featureType: 'transit',
+                elementType: 'geometry',
+                stylers: [{color: '#2f3948'}]
+              },
+              {
+                featureType: 'transit.station',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#d59563'}]
+              },
+              {
+                featureType: 'water',
+                elementType: 'geometry',
+                stylers: [{color: '#17263c'}]
+              },
+              {
+                featureType: 'water',
+                elementType: 'labels.text.fill',
+                stylers: [{color: '#515c6d'}]
+              },
+              {
+                featureType: 'water',
+                elementType: 'labels.text.stroke',
+                stylers: [{color: '#17263c'}]
+              }
+            ]
+          });
+  }
 
-// req.end(function (res) {
-// 	if (res.error) throw new Error(res.error);
+// ROUTES
 
-// 	console.log(res.body);
-// });
+app.get('/api/:id/:carrier_code', (req, res) => {
+    const apiReq = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
+        apiReq.headers({
+        "x-rapidapi-host": "order-tracking.p.rapidapi.com",
+        "x-rapidapi-key": "71db88e15amshcf09b459b324355p146d98jsn535e15d76413",
+        "content-type": "application/json",
+        "accept": "application/json",
+        "useQueryString": true
+    });
+    apiReq.type("json");
+    apiReq.send({
+        "tracking_number": req.params.id,
+        "carrier_code": req.params.carrier_code
+    });
+    let apiResponse
+    apiReq.end(function (response) {
+        if (response.error) throw new Error(response.error);
+        apiResponse = response.body.data;
+        // res.send(`<div>
+        // <h1>Package</h1>
+        // <p>Id: ${apiResponse.items[0].id}<br />
+        // Tracking number:${apiResponse.items[0].tracking_number}<br />
+        // Carrier Code: ${apiResponse.items[0].carrier_code}<br />
+        // Time received: ${apiResponse.items[0].origin_info.trackinfo[1].Date}<br />
+        // Origin Desination: ${apiResponse.items[0].origin_info.trackinfo[1].Details} <br />
+        // Arrival Destination: ${apiResponse.items[0].origin_info.trackinfo[0].Details} <br />
+        // Status: ${apiResponse.items[0].origin_info.trackinfo[0].StatusDescription} <br />
+        // </p>
+        // </div>`)
+        res.send(apiResponse) 
+            // `https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${apiResponse.items[0].origin_info.trackinfo[1].Details}&destinations=${apiResponse.items[0].origin_info.trackinfo[0].Details}&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs`)
+        
+    });
+})
 
-/****
- * Connect
- **/
-mongoose.connect(mongoURI, {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-  useFindAndModify: true,
-});
-db.once("open", () => show("db open on", mongoURI));
+// app.get('/api', (req, res) => {
+//     const apiReq = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
+//         apiReq.headers({
+//         "x-rapidapi-host": "order-tracking.p.rapidapi.com",
+//         "x-rapidapi-key": "71db88e15amshcf09b459b324355p146d98jsn535e15d76413",
+//         "content-type": "application/json",
+//         "accept": "application/json",
+//         "useQueryString": true
+//     });
+//     apiReq.type("json");
+//     apiReq.send({
+//         "tracking_number": "1Z74A08E0317341984",
+//         "carrier_code": "ups"
+//     });
+//     let apiResponse
+//     apiReq.end(function (response) {
+//         if (response.error) throw new Error(response.error);
+//         apiResponse = response.body.data;
+//         // res.send(`<div>
+//         // <h1>Package</h1>
+//         // <p>Id: ${apiResponse.items[0].id}<br />
+//         // Tracking number:${apiResponse.items[0].tracking_number}<br />
+//         // Carrier Code: ${apiResponse.items[0].carrier_code}<br />
+//         // Time received: ${apiResponse.items[0].origin_info.trackinfo[1].Date}<br />
+//         // Origin Desination: ${apiResponse.items[0].origin_info.trackinfo[1].Details} <br />
+//         // Arrival Destination: ${apiResponse.items[0].origin_info.trackinfo[0].Details} <br />
+//         // Status: ${apiResponse.items[0].origin_info.trackinfo[0].StatusDescription} <br />
+//         // </p>
+//         // </div>`)
+//         res.send(apiResponse)
+//     });
+// })
 
-// SERVER LISTENER
+// Distance Matrix API
+// https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${apiResponse.items[0].origin_info.trackinfo[1].Details}&destinations=${apiResponse.items[0].origin_info.trackinfo[0].Details}&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
+
+// Geocoding API
+// https://maps.googleapis.com/maps/api/geocode/json?address=Wilmington,+DE&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
+
+app.get('/index', async (req, res) => {
+    res.json(await Package.find({}))
+})
+
+app.post('/create', async (req, res) => {
+    res.json(await Package.create(req.body)) 
+})
+
+app.get('/show/:id', async (req, res) => {
+    res.json(await Package.findById(req.params.id))
+})
+
+app.put('/update/:id', async (req, res) => {
+    res.json(await Package.findByIdAndUpdate(req.params.id, req.body))
+})
+
+app.delete('/delete/:id', async (req, res) => {
+    res.json(await Package.findByIdAndDelete(req.params.id))
+})
+
+
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
-});
+    console.log(`Listening on port ${PORT}`)
+})
