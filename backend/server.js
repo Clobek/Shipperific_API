@@ -60,6 +60,7 @@ app.post('/login', async (req, res) => {
 
 // AUTHORIZATION MIDDLEWARE
 const auth = async (req, res, next) => {
+  try {
   const {authorization} = req.headers;
   // "bearer a452348956y0"
   // check if there's a header
@@ -71,6 +72,9 @@ const auth = async (req, res, next) => {
           next();
   } else {
           res.send('NO TOKEN')
+  }}
+  catch(error) {
+    res.send(error)
   }
 }
 
