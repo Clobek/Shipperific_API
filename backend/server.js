@@ -1,4 +1,6 @@
 require('custom-env').env(true);
+require('dotenv').config();
+const dotenv = require('dotenv')
 const express = require('express')
 const app = express();
 const mongoose = require('mongoose');
@@ -7,11 +9,12 @@ const PORT = process.env.PORT
 const Package = require('./models/packages.js')
 const User = require('./models/users.js')
 const unirest = require("unirest");
-const KEY = process.env.KEY
+const api_key = process.env.API_KEY
 const jwt = require('jsonwebtoken')
 const packageController = require('./controllers/packages.js');
 const SECRET = process.env.SECRET
 const bcrypt = require('bcrypt')
+const userController = require('./controllers/users_controller.js')
 
 
 // MONGO DATABASE
@@ -33,9 +36,20 @@ db.on('error', (err) => {
 })
 
 //MIDDLEWARE
+app.set('view engine', 'jsx');
+app.engine('jsx', require('express-react-views').createEngine())
 app.use(cors());
 app.use(express.json())
+app.use('users', userController)
 app.use('/packages/', packageController);
+app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride('_method'));
+app.use(session({
+        secret: process.env.SECRET,
+        resave: false,
+        saveUninitialized: false,
+    })
+);
 
 // From Alex Merced's AM Coder - JWT Authentication/ExpressJS - Backend & Frontend. Source: https://www.youtube.com/watch?v=qVe9RpLLEWg
 
@@ -57,6 +71,40 @@ app.post('/login', async (req, res) => {
   } else {
       res.status(400).send('Wrong Username or Password')
   }
+})
+
+// SESSIONS
+
+// Login
+app.get('/sessions/new', (req, res) => {
+  res.render('sessions/New', {currentUser: req.session.currentUser})
+})
+
+app.post('/sessions/', (req, res) => {
+  
+  User.findOne({ 
+    username: req.body.username 
+  }, (error, foundUser) => {
+      if (error) {
+          res.send(error);
+      } else if (!foundUser) {
+          res.redirect('/user/new');
+      } else {
+          // Check Passwords
+          if (bcrypt.compareSync(req.body.password, foundUser.password)) {
+              req.session.currentUser = foundUser.username;
+              res.redirect('/packages/');
+          } else {
+              res.send('WRONG PASSWORD');
+          }
+      }
+  });
+});
+
+app.delete('/sessions/', (req, res) => {
+  req.session.destroy(() => {
+    res.redirection('/sessions/new')
+  })
 })
 
 // AUTHORIZATION MIDDLEWARE
@@ -92,7 +140,7 @@ app.get('/api/:id/:carrier_code', (req, res) => {
     const apiReq = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
         apiReq.headers({
         "x-rapidapi-host": "order-tracking.p.rapidapi.com",
-        "x-rapidapi-key": "71db88e15amshcf09b459b324355p146d98jsn535e15d76413",
+        "x-rapidapi-key": `${api_key}`,
         "content-type": "application/json",
         "accept": "application/json",
         "useQueryString": true

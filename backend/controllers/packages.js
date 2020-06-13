@@ -1,10 +1,15 @@
 const express = require('express');
 const router = express.Router();
-// const { Schema } = require('mongoose');
-// const Client = require('../models/clients.js')
 const Package = require('../models/packages.js');
 const unirest = require('unirest');
 const jwt = require('jsonwebtoken');
+const isAuthenticated = (req, res, next) => {
+    if(req.session.currentUser) {
+        return next()
+    } else {
+        res.redirect('/sessions/new')
+    }
+}
 
 
 // ROUTES
@@ -36,13 +41,22 @@ router.get('/', async (req, res) => {
     try {
         const packages = await Package.find({});
         res.status(200).json(packages);
+        res.render('Index', {
+            packages: allPackages,
+            currentUser: req.session.currentUser
+        })
     } catch(error) {
         res.status(400).json(error)
     }
 });
 
+// NEW
+router.get('/new', isAuthenticated, (req, res) => {
+    res.render('New', {currentUser: req.session.currentUser})
+})
+
 // CREATE
-router.post('/', async (req, res) => {
+router.post('/', isAuthenticated, async (req, res) => {
     try {
         console.log(req.body);
         const createdPackage = await Package.create(req.body);
@@ -58,19 +72,30 @@ router.get('/:id', async (req, res) => {
     try {
         const foundPackage = await Package.findById(req.params.id);
         res.status(200).json(foundPackage)
+        res.render('Show', {
+            currentUser: req.session.currentUser
+        })
     } catch(error) {
         res.status(400).json(error);        
     }
 })
 
+// EDIT
+router.get('/edit/:id', isAuthenticated, (req, res) => {
+    Package.findById(req.params.id, (error, foundPackage) => {
+        res.render('Edit', {currentUser: req.session.currentUser})
+    })
+})
+
 // UPDATE
-router.put('/:id', async (req, res) => {
+router.put('/:id', isAuthenticated, async (req, res) => {
     try {
         const updatedPackage = await Package.findByIdAndUpdate(
             req.params.id, 
             req.body
             );
             res.status(200).json(updatedPackage)
+            res.redirect(`/user/${req.session.currentUser._id}`)
     } catch(error) {
         res.status(400).json(error);
     }
