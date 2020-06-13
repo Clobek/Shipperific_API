@@ -5,13 +5,13 @@ const mongoose = require('mongoose');
 const cors = require('cors')
 const PORT = process.env.PORT
 const Package = require('./models/packages.js')
+const User = require('./models/users.js')
 const unirest = require("unirest");
 const KEY = process.env.KEY
 const jwt = require('jsonwebtoken')
 const packageController = require('./controllers/packages.js');
 const SECRET = process.env.SECRET
-// const initMap = require('./maps.js')
-// const Index = require('./index')
+const bcrypt = require('bcrypt')
 
 
 // MONGO DATABASE
@@ -42,12 +42,11 @@ app.use('/packages/', packageController);
 // DUMMY USER
 const user = {username: 'bryce', password: 'ship'}
 
-// AUTHENTICATE ROUTE
-
-// const token = jwt.sign({cheese: 'gouda'}, SECRET);
-// console.log(token)
-// const decoded = jwt.verify(token, SECRET);
-// console.log(decoded)
+app.post('/signup', (req, res)=>{
+  req.body.password = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10))
+  User.create(req.body, (error, createdUser)=>{
+  })
+})
 
 // LOGIN 
 app.post('/login', async (req, res) => {
@@ -84,114 +83,8 @@ const auth = async (req, res, next) => {
 // TEST ROUTE
 app.get('/test', auth, (req, res) => {
   res.send(req.user)
+  console.log(req.user.username)
 })
-
-// const approvedList = ['http://localhost:1985'];
-// const corsOptions = {
-//     origin: function (origin, callback) {
-//         if (approvedList.indexOf(origin) !== -1) {
-//             callback(null, true);
-//         } else {
-//             callback(new Error('Not allowed by CORS'));
-//         }
-//     },
-// };
-
-// MAP
-
-// GOOGLE MAPS - Maps JavaScript API. Source: https://developers.google.com/maps/documentation/javascript/geocoding
-var map;
-function initMap() {
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: { lat: -34.397, lng: 150.644 },
-    zoom: 8,
-    // Style source: https://developers.google.com/maps/documentation/javascript/styling#style-example
-    styles: [
-      {elementType: 'geometry', stylers: [{color: '#242f3e'}]},
-      {elementType: 'labels.text.stroke', stylers: [{color: '#242f3e'}]},
-      {elementType: 'labels.text.fill', stylers: [{color: '#746855'}]},
-      {
-        featureType: 'administrative.locality',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#d59563'}]
-      },
-      {
-        featureType: 'poi',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#d59563'}]
-      },
-      {
-        featureType: 'poi.park',
-        elementType: 'geometry',
-        stylers: [{color: '#263c3f'}]
-      },
-      {
-        featureType: 'poi.park',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#6b9a76'}]
-      },
-      {
-        featureType: 'road',
-        elementType: 'geometry',
-        stylers: [{color: '#38414e'}]
-      },
-      {
-        featureType: 'road',
-        elementType: 'geometry.stroke',
-        stylers: [{color: '#212a37'}]
-      },
-      {
-        featureType: 'road',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#9ca5b3'}]
-      },
-      {
-        featureType: 'road.highway',
-        elementType: 'geometry',
-        stylers: [{color: '#746855'}]
-      },
-      {
-        featureType: 'road.highway',
-        elementType: 'geometry.stroke',
-        stylers: [{color: '#1f2835'}]
-      },
-      {
-        featureType: 'road.highway',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#f3d19c'}]
-      },
-      {
-        featureType: 'transit',
-        elementType: 'geometry',
-        stylers: [{color: '#2f3948'}]
-      },
-      {
-        featureType: 'transit.station',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#d59563'}]
-      },
-      {
-        featureType: 'water',
-        elementType: 'geometry',
-        stylers: [{color: '#17263c'}]
-      },
-      {
-        featureType: 'water',
-        elementType: 'labels.text.fill',
-        stylers: [{color: '#515c6d'}]
-      },
-      {
-        featureType: 'water',
-        elementType: 'labels.text.stroke',
-        stylers: [{color: '#17263c'}]
-      }
-    ]
-  }); 
-  var script = document.createElement('script');
-  script.src = 'http:';
-  document.getElementsByTagName('head')[0].appendChild(script);
-  var marker = new google.maps.Marker({map: map, position: { lat: -34.397, lng: 150.644 }});
-}
 
 // ROUTES
 
@@ -213,48 +106,9 @@ app.get('/api/:id/:carrier_code', (req, res) => {
     apiReq.end(function (response) {
         if (response.error) throw new Error(response.error);
         apiResponse = response.body.data;
-        // res.send(`<div>
-        // <h1>Package</h1>
-        // <p>Id: ${apiResponse.items[0].id}<br />
-        // Tracking number:${apiResponse.items[0].tracking_number}<br />
-        // Carrier Code: ${apiResponse.items[0].carrier_code}<br />
-        // Time received: ${apiResponse.items[0].origin_info.trackinfo[1].Date}<br />
-        // Origin Desination: ${apiResponse.items[0].origin_info.trackinfo[1].Details} <br />
-        // Arrival Destination: ${apiResponse.items[0].origin_info.trackinfo[0].Details} <br />
-        // Status: ${apiResponse.items[0].origin_info.trackinfo[0].StatusDescription} <br />
-        // </p>
-        // </div>`)
         res.send(apiResponse) 
     });
 })
-
-
-// Distance Matrix API
-// https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=${apiResponse.items[0].origin_info.trackinfo[1].Details}&destinations=${apiResponse.items[0].origin_info.trackinfo[0].Details}&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
-
-// Geocoding API
-// https://maps.googleapis.com/maps/api/geocode/json?address=Wilmington,+DE&key=AIzaSyCy8_EIOMhVVsD2eGHH5Rjy5DicXvNBzbs
-
-// app.get('/index', async (req, res) => {
-//     res.json(await Package.find({}))
-// })
-
-// app.post('/create', async (req, res) => {
-//     res.json(await Package.create(req.body)) 
-// })
-
-// app.get('/show/:id', async (req, res) => {
-//     res.json(await Package.findById(req.params.id))
-// })
-
-// app.put('/update/:id', async (req, res) => {
-//     res.json(await Package.findByIdAndUpdate(req.params.id, req.body))
-// })
-
-// app.delete('/delete/:id', async (req, res) => {
-//     res.json(await Package.findByIdAndDelete(req.params.id))
-// })
-
 
 app.listen(PORT, () => {
     console.log(`Listening on port ${PORT}`)
