@@ -3,8 +3,6 @@
 let token;
 
 const login = async () => {
-    console.log('start')
-    // if token already exists in local storage, don't make another one
     if(window.localStorage.getItem('token')) {
         console.log('token exists')
         token = JSON.parse(window.localStorage.getItem('token'))
