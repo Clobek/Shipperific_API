@@ -1,35 +1,27 @@
 const express = require('express');
 const router = express.Router();
-// const { Schema } = require('mongoose');
-// const Client = require('../models/clients.js')
 const Package = require('../models/packages.js');
-const unirest = require('unirest');
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken')
 
 
 // ROUTES
 
-router.get('/api/:id/:carrier_code', (req, res) => {
-    const apiReq = unirest("POST", "https://order-tracking.p.rapidapi.com/trackings/realtime");
-        apiReq.headers({
-        "x-rapidapi-host": "order-tracking.p.rapidapi.com",
-        "x-rapidapi-key": "71db88e15amshcf09b459b324355p146d98jsn535e15d76413",
-        "content-type": "application/json",
-        "accept": "application/json",
-        "useQueryString": true
-    });
-    apiReq.type("json");
-    apiReq.send({
-        "tracking_number": req.params.id,
-        "carrier_code": req.params.carrier_code
-    });
-    let apiResponse
-    apiReq.end(function (response) {
-        if (response.error) throw new Error(response.error);
-        apiResponse = response.body.data;
-        res.send(apiResponse) 
-    });
-})
+const auth = async (req, res, next) => {
+    try {
+    const {authorization} = req.headers;
+    if (authorization) {
+        await console.log(token)
+            const token = authorization.split(' ')[1];
+            const result = jwt.verify(token, SECRET)
+            req.user = result;
+            next();
+    } else {
+            res.send('NO TOKEN')
+    }}
+    catch(error) {
+      res.send(error)
+    }
+  }
 
 // INDEX
 router.get('/', async (req, res) => {
@@ -42,12 +34,10 @@ router.get('/', async (req, res) => {
 });
 
 // CREATE
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     try {
-        console.log(req.body);
-        const createdPackage = await Package.create(req.body);
-        // const createdPackage = await Package.create({userID: req.body.token});
-        res.status(200).json(createdPackage);
+        // const createdPackage = await Package.create({item: req.body.item, tracking_number: req.body.tracking_number, carrier_code: req.body.carrier, userID: req.user});
+        // res.status(200).json(createdPackage);
     } catch(error) {
         res.status(400).json(error);
     }
