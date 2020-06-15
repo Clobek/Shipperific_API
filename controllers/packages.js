@@ -8,12 +8,14 @@ const SECRET = process.env.SECRET
 // ROUTES
 
 const auth = async (req, res, next) => {
+    console.log('Auth')
     try {
     const {authorization} = req.headers;
     if (authorization) {
             const token = authorization.split(' ')[1];
             const result = jwt.verify(token, SECRET)
             req.user = result;
+            console.log('Verified')
             next();
     } else {
             res.send('NO TOKEN')
@@ -26,7 +28,9 @@ const auth = async (req, res, next) => {
 //Show\\
 router.get('/', auth, async (req, res) => {
     try {
+        console.log('Get Route')
         const packages = await Package.find({userID: req.user.username});
+        console.log('Found Packages')
         res.status(200).json(packages);
     } catch(error) {
         res.status(400).json(error)
