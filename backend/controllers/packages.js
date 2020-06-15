@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Package = require('../models/packages.js');
 const jwt = require('jsonwebtoken')
+const SECRET = process.env.SECRET
 
 
 // ROUTES
@@ -10,7 +11,6 @@ const auth = async (req, res, next) => {
     try {
     const {authorization} = req.headers;
     if (authorization) {
-        await console.log(token)
             const token = authorization.split(' ')[1];
             const result = jwt.verify(token, SECRET)
             req.user = result;
@@ -23,10 +23,10 @@ const auth = async (req, res, next) => {
     }
   }
 
-// INDEX
-router.get('/', async (req, res) => {
+//Show\\
+router.get('/', auth, async (req, res) => {
     try {
-        const packages = await Package.find({});
+        const packages = await Package.find({userID: req.user.username});
         res.status(200).json(packages);
     } catch(error) {
         res.status(400).json(error)
@@ -36,20 +36,9 @@ router.get('/', async (req, res) => {
 // CREATE
 router.post('/', auth, async (req, res) => {
     try {
-        // const createdPackage = await Package.create({item: req.body.item, tracking_number: req.body.tracking_number, carrier_code: req.body.carrier, userID: req.user});
-        // res.status(200).json(createdPackage);
+        Package.create({item: req.body.item, tracking_number: req.body.tracking_number, carrier_code: req.body.carrier, userID: req.user.username});
     } catch(error) {
         res.status(400).json(error);
-    }
-})
-
-// SHOW
-router.get('/:id', async (req, res) => {
-    try {
-        const foundPackage = await Package.findById(req.params.id);
-        res.status(200).json(foundPackage)
-    } catch(error) {
-        res.status(400).json(error);        
     }
 })
 
@@ -67,10 +56,9 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', auth, async (req, res) => {
     try {
-        const deletedPackage = await Package.findByIdAndDelete(req.params.id)
-        res.status(200).json(deletedPackage)
+        await Package.findByIdAndDelete(req.params.id)
     } catch(error) {
         res.status(400).json(error);
     }

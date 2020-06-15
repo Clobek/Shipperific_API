@@ -100,7 +100,7 @@ app.get('/api/:id/:carrier_code', (req, res) => {
     apiReq.end(function (response) {
         if (response.error) throw new Error(response.error);
         apiResponse = response.body.data;
-        res.send(apiResponse) 
+        res.send(apiResponse)
     });
 })
 
