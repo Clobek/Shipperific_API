@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken')
 const packageController = require('./controllers/packages.js');
 const SECRET = process.env.SECRET
 const bcrypt = require('bcrypt')
+const morgan = require('morgan')
 
 
 // MONGO DATABASE
@@ -32,6 +33,7 @@ db.on('error', (err) => {
 })
 
 //MIDDLEWARE
+app.use(morgan('combined'))
 app.use(cors());
 app.use(express.json())
 app.use('/packages/', packageController);
